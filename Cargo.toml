@@ -17,4 +17,6 @@ release.panic = "abort"
 
 
 [dependencies]
+flagset = { version = "0.4.6", default-features = false }
+thiserror = { version = "2.0.11", default-features = false }
 wut = { path = "../wut-rs" }

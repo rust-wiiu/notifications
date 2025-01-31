@@ -14,7 +14,7 @@ fn main() {
 
     println!("{link_search_path}={ppc}/powerpc-eabi/lib",);
     println!("{link_search_path}={ppc}/lib/gcc/powerpc-eabi/13.1.0");
-    println!("{link_search_path}={dkp}/wut/lib/");
+    println!("{link_search_path}={dkp}/wut/lib");
     println!("{link_search_path}={dkp}/wums/lib");
 
     println!("{link_lib}=notifications");
@@ -23,11 +23,12 @@ fn main() {
     println!("{link_lib}=c");
     println!("{link_lib}=g");
     println!("{link_lib}=gcc");
-    println!("{link_lib}=sysbase");
+    // println!("{link_lib}=sysbase");
+    println!("{link_lib}=stdc++");
 
     /*
      * These bindings will create many errors since the target cpu is a 32bit system and the host (the compilation PC) is likely a 64bit system.
-     * There are alignment and size checks which will fail, because pointers have different sizes.
+     * There are alignment and size checks which will fail, because pointers (usize, isize) have different sizes.
      */
     let bindings = bindgen::Builder::default()
         .use_core()
@@ -43,15 +44,15 @@ fn main() {
         .clang_args(vec![
             "--target=powerpc-none-eabi",
             &format!("--sysroot={ppc}/powerpc-eabi"),
-            // "-xc++",
+            "-xc++",
             "-m32",
             "-mfloat-abi=hard",
             &format!("-I{dkp}/wums/include"),
             &format!("-I{dkp}/wut/include"),
             &format!("-I{ppc}/powerpc-eabi/include"),
-            // &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0"),
-            // &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0/powerpc-eabi"),
-            "-Wno-return-type-c-linkage", // ig we can ignore these
+            &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0"),
+            &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0/powerpc-eabi"),
+            // "-Wno-return-type-c-linkage", // ig we can ignore these
         ])
         .allowlist_file(".*/wums/include/notifications/.*.h") // (h|hpp)
         // we need some extra functions
