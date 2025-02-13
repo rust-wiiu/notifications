@@ -13,23 +13,11 @@ fn main() {
     let ppc = env::var("DEVKITPPC").expect("Please provided DEVKITPPC via env variables");
 
     println!("{link_search_path}={ppc}/powerpc-eabi/lib",);
-    println!("{link_search_path}={ppc}/lib/gcc/powerpc-eabi/13.1.0");
-    println!("{link_search_path}={dkp}/wut/lib");
     println!("{link_search_path}={dkp}/wums/lib");
 
     println!("{link_lib}=notifications");
-    println!("{link_lib}=wut");
-    println!("{link_lib}=m");
-    println!("{link_lib}=c");
-    println!("{link_lib}=g");
-    println!("{link_lib}=gcc");
-    // println!("{link_lib}=sysbase");
     println!("{link_lib}=stdc++");
 
-    /*
-     * These bindings will create many errors since the target cpu is a 32bit system and the host (the compilation PC) is likely a 64bit system.
-     * There are alignment and size checks which will fail, because pointers (usize, isize) have different sizes.
-     */
     let bindings = bindgen::Builder::default()
         .use_core()
         .header("src/wrapper.h")
@@ -52,22 +40,8 @@ fn main() {
             &format!("-I{ppc}/powerpc-eabi/include"),
             &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0"),
             &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0/powerpc-eabi"),
-            // "-Wno-return-type-c-linkage", // ig we can ignore these
         ])
-        .allowlist_file(".*/wums/include/notifications/.*.h") // (h|hpp)
-        // we need some extra functions
-        // .header_contents(
-        //     "single_symbols.h",
-        //     r#"
-        //         #pragma once
-        //         #include <unistd.h>
-        //         #include <errno.h>
-        //     "#,
-        // )
-        // .allowlist_function("close")
-        // .allowlist_function("__errno")
-        // .allowlist_var("^E[A-Z0-9_]+$")
-        //
+        .allowlist_file(".*/wums/include/notifications/.*.h")
         .raw_line("#![allow(non_upper_case_globals)]")
         .raw_line("#![allow(non_camel_case_types)]")
         .raw_line("#![allow(non_snake_case)]")
