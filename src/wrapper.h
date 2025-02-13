@@ -1,2 +1,2 @@
-#include <notifications/notifications.h>
-#include <notifications/notification_defines.h>
+#include <notifications.h>
+#include <notification_defines.h>

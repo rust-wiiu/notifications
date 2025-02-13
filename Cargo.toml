@@ -3,6 +3,7 @@ name = "notifications"
 version = "0.1.0"
 edition = "2021"
 build = "build.rs"
+links = "notifications"
 
 [lib]
 name = "notifications"
@@ -19,4 +20,4 @@ release.panic = "abort"
 [dependencies]
 flagset = { version = "0.4.6", default-features = false }
 thiserror = { version = "2.0.11", default-features = false }
-wut = { path = "../wut-rs" }
+wut = { path = "../wut" }

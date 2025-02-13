@@ -47,7 +47,7 @@ fn main() {
             "-xc++",
             "-m32",
             "-mfloat-abi=hard",
-            &format!("-I{dkp}/wums/include"),
+            &format!("-I{dkp}/wums/include/notifications"),
             &format!("-I{dkp}/wut/include"),
             &format!("-I{ppc}/powerpc-eabi/include"),
             &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0"),
