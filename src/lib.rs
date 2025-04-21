@@ -13,7 +13,10 @@ use core::{
     panic::{RefUnwindSafe, UnwindSafe},
 };
 use thiserror::Error;
-use wut::rrc::{Rrc, RrcGuard};
+use wut::{
+    gx2::color::Color,
+    rrc::{Rrc, RrcGuard},
+};
 
 static NOTIFY: Rrc = Rrc::new(
     || unsafe {
@@ -84,206 +87,32 @@ impl TryFrom<i32> for NotificationError {
 
 // region: Color
 
-pub struct Color(c::NMColor);
-
 impl Into<c::NMColor> for Color {
     fn into(self) -> c::NMColor {
-        self.0
+        c::NMColor {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a: self.a,
+        }
     }
 }
 
 impl From<c::NMColor> for Color {
     fn from(value: c::NMColor) -> Self {
-        Self(value)
-    }
-}
-
-impl Color {
-    #[inline]
-    pub fn white(opacity: f32) -> Self {
-        return Self(c::_NMColor {
-            r: 255,
-            g: 255,
-            b: 255,
-            a: (255f32 * opacity) as u8,
-        });
-    }
-
-    #[inline]
-    pub fn black(opacity: f32) -> Self {
-        return Self(c::_NMColor {
-            r: 0,
-            g: 0,
-            b: 0,
-            a: (255f32 * opacity) as u8,
-        });
-    }
-
-    #[inline]
-    pub fn red(opacity: f32) -> Self {
-        return Self(c::_NMColor {
-            r: 255,
-            g: 0,
-            b: 0,
-            a: (255f32 * opacity) as u8,
-        });
+        Self {
+            r: value.r,
+            g: value.g,
+            b: value.b,
+            a: value.a,
+        }
     }
 }
 
 // endregion
 
-/*
-pub struct NotificationBuilder {
-    text: String,
-    text_color: Color,
-    bg_color: Color,
-}
-
-impl Default for NotificationBuilder {
-    #[inline]
-    fn default() -> Self {
-        Self {
-            text: "".to_string(),
-            text_color: Color::white(1.0),
-            bg_color: Color::black(0.5),
-        }
-    }
-}
-
-impl NotificationBuilder {
-    #[inline]
-    pub fn text(mut self, text: &str) -> Self {
-        self.text = text.to_string();
-        self
-    }
-
-    #[inline]
-    pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
-        self
-    }
-
-    #[inline]
-    pub fn bg_color(mut self, color: Color) -> Self {
-        self.bg_color = color;
-        self
-    }
-
-    #[inline]
-    pub fn build(self) -> Result<Notification, NotificationError> {
-        let mut handle = Default::default();
-        let text = CString::new(self.text)?;
-
-        let status = unsafe {
-            c::NotificationModule_AddDynamicNotificationEx(
-                text.as_ptr(),
-                &mut handle,
-                self.text_color.0,
-                self.bg_color.0,
-                None,
-                core::ptr::null_mut(),
-                false,
-            )
-        };
-        NotificationError::try_from(status)?;
-
-        Ok(Notification {
-            handle,
-            _resource: NOTIFY.acquire(),
-        })
-    }
-}
-
-pub struct Notification {
-    handle: c::NotificationModuleHandle,
-    _resource: RrcGuard,
-}
-
-impl Notification {
-    #[inline]
-    pub fn new(text: &str) -> Result<Self, NotificationError> {
-        NotificationBuilder::default().text(text).build()
-    }
-
-    #[inline]
-    pub fn builder() -> NotificationBuilder {
-        NotificationBuilder::default()
-    }
-
-    #[inline]
-    pub fn text(&self, text: &str) -> Result<(), NotificationError> {
-        let text = CString::new(text)?;
-
-        let status = unsafe {
-            c::NotificationModule_UpdateDynamicNotificationText(self.handle, text.as_ptr())
-        };
-        NotificationError::try_from(status)?;
-
-        Ok(())
-    }
-
-    #[inline]
-    pub fn text_color(&self, color: Color) -> Result<(), NotificationError> {
-        let status = unsafe {
-            c::NotificationModule_UpdateDynamicNotificationTextColor(self.handle, color.0)
-        };
-        NotificationError::try_from(status)?;
-
-        Ok(())
-    }
-
-    #[inline]
-    pub fn bg_color(&self, color: Color) -> Result<(), NotificationError> {
-        let status = unsafe {
-            c::NotificationModule_UpdateDynamicNotificationBackgroundColor(self.handle, color.0)
-        };
-        NotificationError::try_from(status)?;
-
-        Ok(())
-    }
-}
-
-impl Drop for Notification {
-    fn drop(&mut self) {
-        let status = unsafe { c::NotificationModule_FinishDynamicNotification(self.handle, 0.0) };
-        NotificationError::try_from(status).unwrap();
-    }
-}
-
-unsafe impl Sync for Notification {}
-unsafe impl Send for Notification {}
-impl RefUnwindSafe for Notification {}
-impl UnwindSafe for Notification {}
-
-pub fn info(text: &str) -> Result<(), NotificationError> {
-    let _r = NOTIFY.acquire();
-    let text = CString::new(text)?;
-    let status = unsafe { c::NotificationModule_AddInfoNotification(text.as_ptr()) };
-    NotificationError::try_from(status)?;
-
-    Ok(())
-}
-
-unsafe extern "C" fn callback(
-    handle: c::NotificationModuleHandle,
-    context: *mut core::ffi::c_void,
-) {
-    wut::logger::init(wut::logger::Udp).unwrap();
-    wut::println!("callback");
-    wut::logger::deinit();
-}
-*/
-
 use alloc::boxed::Box;
 use core::time::Duration;
-
-pub fn test() {
-    let _r = NOTIFY.acquire();
-    unsafe {
-        let status = c::NotificationModule_AddErrorNotification(c"WithCallback".as_ptr());
-        wut::println!("{:?}", NotificationError::try_from(status));
-    };
-}
 
 // region: Notification
 
@@ -310,7 +139,7 @@ impl Notification {
     #[inline]
     pub fn text_color(&self, color: Color) -> Result<(), NotificationError> {
         let status = unsafe {
-            c::NotificationModule_UpdateDynamicNotificationTextColor(self.handle, color.0)
+            c::NotificationModule_UpdateDynamicNotificationTextColor(self.handle, color.into())
         };
         NotificationError::try_from(status)?;
 
@@ -320,7 +149,10 @@ impl Notification {
     #[inline]
     pub fn bg_color(&self, color: Color) -> Result<(), NotificationError> {
         let status = unsafe {
-            c::NotificationModule_UpdateDynamicNotificationBackgroundColor(self.handle, color.0)
+            c::NotificationModule_UpdateDynamicNotificationBackgroundColor(
+                self.handle,
+                color.into(),
+            )
         };
         NotificationError::try_from(status)?;
 
@@ -379,8 +211,8 @@ impl NotificationType for Dynamic {
             c::NotificationModule_AddDynamicNotificationEx(
                 text.as_ptr(),
                 &mut handle,
-                builder.text_color.0,
-                builder.background_color.0,
+                builder.text_color.into(),
+                builder.background_color.into(),
                 callback,
                 context,
                 builder.keep_until_shown,
@@ -416,8 +248,8 @@ impl NotificationType for Info {
             c::NotificationModule_AddInfoNotificationEx(
                 text.as_ptr(),
                 builder.duration.as_secs_f32(),
-                builder.text_color.0,
-                builder.background_color.0,
+                builder.text_color.into(),
+                builder.background_color.into(),
                 callback,
                 context,
                 builder.keep_until_shown,
@@ -449,8 +281,8 @@ impl NotificationType for Error {
                 text.as_ptr(),
                 builder.duration.as_secs_f32(),
                 builder.shake.map_or(0.0, |d| d.as_secs_f32()),
-                builder.text_color.0,
-                builder.background_color.0,
+                builder.text_color.into(),
+                builder.background_color.into(),
                 callback,
                 context,
                 builder.keep_until_shown,
@@ -479,8 +311,8 @@ impl<T: NotificationType> Default for NotificationBuilder<T> {
         Self {
             text: String::from(""),
             duration: Duration::from_secs(5),
-            text_color: Color::white(1.0),
-            background_color: Color::black(0.5),
+            text_color: Color::white(),
+            background_color: Color::black().opacity(0.5).into(),
             callback: None,
             keep_until_shown: true,
             shake: None,
@@ -578,6 +410,6 @@ pub fn info(text: &str) -> NotificationBuilder<Info> {
 pub fn error(text: &str) -> NotificationBuilder<Error> {
     NotificationBuilder::<Error>::default()
         .text(text)
-        .background_color(Color::red(1.0))
+        .background_color(Color::red())
         .shake(Some(Duration::from_secs(1)))
 }
