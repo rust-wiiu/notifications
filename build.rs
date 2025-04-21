@@ -38,8 +38,8 @@ fn main() {
             &format!("-I{dkp}/wums/include/notifications"),
             &format!("-I{dkp}/wut/include"),
             &format!("-I{ppc}/powerpc-eabi/include"),
-            &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0"),
-            &format!("-I{ppc}/powerpc-eabi/include/c++/13.1.0/powerpc-eabi"),
+            &format!("-I{ppc}/powerpc-eabi/include/c++/14.2.0"),
+            &format!("-I{ppc}/powerpc-eabi/include/c++/14.2.0/powerpc-eabi"),
         ])
         .allowlist_file(".*/wums/include/notifications/.*.h")
         .raw_line("#![allow(non_upper_case_globals)]")
