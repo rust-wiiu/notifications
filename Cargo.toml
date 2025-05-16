@@ -1,7 +1,11 @@
 [package]
 name = "notifications"
+description = "Overlay Notifications"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+repository = "https://github.com/rust-wiiu/notifications"
+publish = false
 build = "build.rs"
 links = "notifications"
 
@@ -20,4 +24,4 @@ release.panic = "abort"
 [dependencies]
 flagset = { version = "0.4.6", default-features = false }
 thiserror = { version = "2.0.11", default-features = false }
-wut = { path = "../wut" }
+wut = { path = "../wut", version = "0.2.0" }
