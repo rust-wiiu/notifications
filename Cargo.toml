@@ -24,4 +24,4 @@ release.panic = "abort"
 [dependencies]
 flagset = { version = "0.4.6", default-features = false }
 thiserror = { version = "2.0.11", default-features = false }
-wut = { path = "../wut", version = "0.2.0" }
+wut = { git = "https://github.com/rust-wiiu/wut" }
