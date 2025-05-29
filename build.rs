@@ -1,6 +1,10 @@
-use std::env;
-
 extern crate bindgen;
+extern crate semver;
+
+use semver::Version;
+use std::{env, fs};
+
+const MIN_VERSION: Version = Version::new(14, 2, 0);
 
 fn main() {
     println!("cargo:rerun-if-changed=src/wrapper.h");
@@ -11,6 +15,22 @@ fn main() {
 
     let dkp = env::var("DEVKITPRO").expect("Please provided DEVKITPRO via env variables");
     let ppc = env::var("DEVKITPPC").expect("Please provided DEVKITPPC via env variables");
+
+    let gcc_dir = format!("{ppc}/lib/gcc/powerpc-eabi");
+    let version = fs::read_dir(&gcc_dir)
+        .unwrap_or_else(|_| panic!("Failed to read directory: {gcc_dir}"))
+        .filter_map(|entry| {
+            entry
+                .ok()?
+                .file_name()
+                .to_str()
+                .and_then(|name| Version::parse(name).ok())
+                .filter(|version| version >= &MIN_VERSION)
+        })
+        .max()
+        .expect(&format!(
+            "No valid versions >= {MIN_VERSION} found in {gcc_dir} directory"
+        ));
 
     println!("{link_search_path}={ppc}/powerpc-eabi/lib",);
     println!("{link_search_path}={dkp}/wums/lib");
@@ -38,8 +58,8 @@ fn main() {
             &format!("-I{dkp}/wums/include/notifications"),
             &format!("-I{dkp}/wut/include"),
             &format!("-I{ppc}/powerpc-eabi/include"),
-            &format!("-I{ppc}/powerpc-eabi/include/c++/14.2.0"),
-            &format!("-I{ppc}/powerpc-eabi/include/c++/14.2.0/powerpc-eabi"),
+            &format!("-I{ppc}/powerpc-eabi/include/c++/{version}"),
+            &format!("-I{ppc}/powerpc-eabi/include/c++/{version}/powerpc-eabi"),
         ])
         .allowlist_file(".*/wums/include/notifications/.*.h")
         .raw_line("#![allow(non_upper_case_globals)]")
