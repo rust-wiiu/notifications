@@ -1,0 +1,12 @@
+[package]
+name = "notifications-sys"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+links = "notifications"
+
+[build-dependencies]
+bindgen = "0.72.0"
+semver = "1.0.26"
+
+[dependencies]

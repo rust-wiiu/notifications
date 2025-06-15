@@ -2,20 +2,10 @@
 name = "notifications"
 description = "Overlay Notifications"
 version = "0.3.1"
-edition = "2021"
+edition = "2024"
 license-file = "LICENSE"
 repository = "https://github.com/rust-wiiu/notifications"
 publish = false
-build = "build.rs"
-links = "notifications"
-
-[lib]
-name = "notifications"
-crate-type = ["lib"]
-
-[build-dependencies]
-bindgen = "0.71.1"
-semver = "1.0.26"
 
 [profile]
 dev.panic = "abort"
@@ -23,6 +13,5 @@ release.panic = "abort"
 
 
 [dependencies]
-flagset = { version = "0.4.6", default-features = false }
-thiserror = { version = "2.0.11", default-features = false }
-wut = { git = "https://github.com/rust-wiiu/wut", tag = "v0.3.1" }
+notifications-sys = { path = "./sys", version = "0.1.0" }
+notifications-core = { path = "./core", version = "0.1.0" }
